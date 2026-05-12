@@ -1,10 +1,10 @@
 from flask import Flask, request
 import sqlite3
+import os
 
 app = Flask(__name__)
 
-DB_PASSWORD = "P@ssw0rd"
-
+DB_PASSWORD = os.environ.get("DB_PASSWORD", "default_password_for_dev")
 
 def get_db():
     conn = sqlite3.connect('users.db')
@@ -15,11 +15,11 @@ def get_user():
     name = request.args.get('name', '')
     conn = get_db()
     cur = conn.cursor()
-    cur.execute("SELECT * FROM users WHERE name = '" + name + "'")
+    cur.execute("SELECT * FROM users WHERE name = ?", (name,))
     row = cur.fetchone()
     if row:
         return {"id": row[0], "name": row[1]}
     return {"error": "User not found"}, 404
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
